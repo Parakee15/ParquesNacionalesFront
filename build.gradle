@@ -8,6 +8,8 @@ mainClassName = 'ioc.App'
 dependencies {
     compile 'com.google.guava:guava:25.1-jre'
 
+    compileOnly('org.projectlombok:lombok:1.18.0')
+    
     testCompile 'junit:junit:4.12'
 }
 
