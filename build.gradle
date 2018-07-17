@@ -7,9 +7,11 @@ mainClassName = 'ioc.App'
 
 dependencies {
     compile 'com.google.guava:guava:25.1-jre'
+    compile 'javax.annotation:javax.annotation-api:1.3.2'
+    compile 'org.apache.commons:commons-csv:1.5'
 
     compileOnly('org.projectlombok:lombok:1.18.0')
-    
+
     testCompile 'junit:junit:4.12'
 }
 
