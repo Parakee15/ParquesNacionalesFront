@@ -9,6 +9,10 @@ public class MemoryMovieProvider extends ForwardingMap<String, Movie> implements
 
   private Map<String, Movie> movies = new LinkedHashMap<>();
 
+  public MemoryMovieProvider() {
+    System.out.println("Using MemoryMovieProvider");
+  }
+
   @Override
   protected Map<String, Movie> delegate() {
     return movies;

@@ -17,6 +17,7 @@ public class CsvMemoryMovieProvider extends ForwardingMap<String, Movie> impleme
   private Map<String, Movie> movies = new LinkedHashMap<>();
 
   public CsvMemoryMovieProvider(final String csvFilePath) {
+    System.out.println("Using CsvMemoryMovieProvider");
     loadDataFromCsv(csvFilePath);
   }
 
