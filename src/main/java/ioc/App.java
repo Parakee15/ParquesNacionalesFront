@@ -2,22 +2,27 @@ package ioc;
 
 import ioc.model.Movie;
 import ioc.providers.CsvMemoryMovieProvider;
-import ioc.providers.MemoryMovieProvider;
+import ioc.services.MoviesMutations;
+import ioc.services.MoviesQueries;
 import ioc.services.mem.MoviesService;
 
 public class App {
 
   public static void main(String[] args) {
-    // CDI: Constructor Dependency Injection
-    MoviesService moviesService = new MoviesService(new MemoryMovieProvider());
-    moviesService.add(new Movie("Vertigo", "Alfred Hitchcock", "CRIME"));
-    moviesService.getMovies().forEach(System.out::println);
+    IoC ioC = new IoC();
+    ioC.registerInstance("csvFilePath", "ALL-MOVIES.csv");
+    ioC.registerInstance("other", "Other String");
+    ioC.register(CsvMemoryMovieProvider.class);
+    ioC.register(MoviesService.class);
 
-    System.out.println("---------------------------------------");
-    // CDI: Constructor Dependency Injection
-    MoviesService csvMoviesService = new MoviesService(
-        new CsvMemoryMovieProvider("ALL-MOVIES.csv")
-    );
-    csvMoviesService.getMovies().forEach(System.out::println);
+    MoviesMutations moviesMutations = ioC.lookup(MoviesMutations.class);
+    moviesMutations.add(new Movie("El Paseo 4", "Juan Camilo Pinzon", "COMEDY"));
+
+    MoviesQueries moviesQueries = ioC.lookup(MoviesQueries.class);
+    moviesQueries.getMovies().forEach(System.out::println);
+
+    System.out.println("--------------------------");
+    System.out.println("IoC instances:");
+    ioC.log();
   }
 }

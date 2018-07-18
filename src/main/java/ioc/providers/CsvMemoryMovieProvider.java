@@ -2,6 +2,7 @@ package ioc.providers;
 
 import com.google.common.collect.ForwardingMap;
 import ioc.model.Movie;
+import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,6 +17,7 @@ public class CsvMemoryMovieProvider extends ForwardingMap<String, Movie> impleme
 
   private Map<String, Movie> movies = new LinkedHashMap<>();
 
+  @ConstructorProperties({"csvFilePath"})
   public CsvMemoryMovieProvider(final String csvFilePath) {
     System.out.println("Using CsvMemoryMovieProvider");
     loadDataFromCsv(csvFilePath);
