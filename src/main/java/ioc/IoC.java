@@ -1,8 +1,10 @@
 package ioc;
 
 import java.beans.ConstructorProperties;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,11 +17,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 public final class IoC {
 
   private final Map<String, Object> instances = new LinkedHashMap<>();
 
+  @SuppressWarnings("unchecked")
   public <T> T lookup(@Nullable String name, @Nonnull Class<T> clazz) {
     Optional<Object> objectOptional = lookupByType(clazz).or(() -> {
       if (name != null) {
@@ -40,7 +45,12 @@ public final class IoC {
   }
 
   public void registerInstance(@Nonnull String name, @Nonnull Object instance) {
-    instances.put(name, instance);
+    addInstance(name, instance, false);
+  }
+
+  public void stop() {
+    System.out.println("Stopping IoC container");
+    instances.forEach((name, object) -> invokePreDestroy(object));
   }
 
   public void log() {
@@ -59,13 +69,20 @@ public final class IoC {
     try {
       Optional<Object> objectOptional = withDefaultConstructor(objectClass);
       if (objectOptional.isPresent()) {
-        instances.put(name, objectOptional.get());
+        addInstance(name, objectOptional.get(), true);
       } else {
-        instances.put(name, withConstructor(constructors.get(0)));
+        addInstance(name, withConstructor(constructors.get(0)), true);
       }
     } catch (Exception e) {
       throw new IllegalStateException(e);
     }
+  }
+
+  private void addInstance(String name, Object instance, boolean runPostConstruct) {
+    if (runPostConstruct) {
+      invokePostConstruct(instance);
+    }
+    instances.put(name, instance);
   }
 
   private Optional<Object> withDefaultConstructor(Class<?> objectClass)
@@ -110,5 +127,27 @@ public final class IoC {
     }
     return Arrays.stream(constructor.getParameters()).map(Parameter::getName)
         .collect(Collectors.toList());
+  }
+
+  private void invokeAnnotatedMethod(Object component,
+      Class<? extends Annotation> annotation) {
+    for (Method method : component.getClass().getDeclaredMethods()) {
+      if (method.isAnnotationPresent(annotation)) {
+        try {
+          method.invoke(component);
+          return;
+        } catch (IllegalAccessException | InvocationTargetException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+  }
+
+  private void invokePostConstruct(Object component) {
+    invokeAnnotatedMethod(component, PostConstruct.class);
+  }
+
+  private void invokePreDestroy(Object component) {
+    invokeAnnotatedMethod(component, PreDestroy.class);
   }
 }
